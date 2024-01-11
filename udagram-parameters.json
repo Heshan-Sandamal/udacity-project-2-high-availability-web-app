@@ -1,6 +1,34 @@
 [
 	{
-		"ParameterKey": "Add you parameters here",
-		"ParameterValue": "Add you parameters here"
+		"ParameterKey": "EnvironmentName",
+		"ParameterValue": "UdacityProject"
+	},
+	{
+		"ParameterKey": "Owner",
+		"ParameterValue": "Heshan"
+	},
+	{
+		"ParameterKey": "MaxInstanceCount",
+		"ParameterValue": "2"
+	},
+	{
+		"ParameterKey": "MinInstanceCount",
+		"ParameterValue": "1"
+	},
+	{
+		"ParameterKey": "DesiredInstanceCount",
+		"ParameterValue": "2"
+	},
+	{
+		"ParameterKey": "AmiId",
+		"ParameterValue": "ami-0557a15b87f6559cf"
+	},
+	{
+		"ParameterKey": "InstanceType",
+		"ParameterValue": "t2.micro"
+	},
+	{
+		"ParameterKey": "BucketName",
+		"ParameterValue": "us-east-1-udacity-project-2-bucket"
 	}
 ]
