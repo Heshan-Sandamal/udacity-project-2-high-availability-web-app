@@ -41,6 +41,11 @@ Parameters:
     Type: String
     Default: 173.12.12.1
 
+  KeyName:
+    Description: Key Name
+    Type: String
+    Default: my-udacity-keypair
+
 Resources:
   LBSecGroup:
     Type: AWS::EC2::SecurityGroup
@@ -67,6 +72,10 @@ Resources:
           FromPort: 80
           ToPort: 80
           SourceSecurityGroupId: !Ref LBSecGroup
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionHostSecGroup
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 0
@@ -84,7 +93,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: !HomeIpAddress
+          CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 0
@@ -96,6 +105,7 @@ Resources:
     Properties:
       LaunchTemplateName: !Sub "${EnvironmentName}-web-servers"
       LaunchTemplateData:
+        KeyName: !Ref KeyName
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
@@ -105,7 +115,7 @@ Resources:
         ImageId: !Ref AmiId
         SecurityGroupIds:
           - !Ref WebServerSecGroup
-        InstanceType: !InstanceType
+        InstanceType: !Ref InstanceType
         BlockDeviceMappings:
           - DeviceName: "/dev/sdk"
             Ebs:
@@ -116,7 +126,17 @@ Resources:
   BastionHostRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${EnvironmentName}-bastion-host"
+      RoleName: !Sub "${EnvironmentName}-bastian-servers"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+
 
   BastionHostProfile:
     Type: AWS::IAM::InstanceProfile
@@ -160,8 +180,8 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       KeyName: !Ref KeyName
-      SecurityGroups:
-        - !Ref Ec2SecurityGroup
+      SecurityGroupIds:
+        - !Ref BastionHostSecGroup
       InstanceType: !Ref InstanceType
       ImageId: !Ref AmiId
       SubnetId:
@@ -203,7 +223,7 @@ Resources:
           TargetGroupArn:
             Ref: WebAppTargetGroup
       LoadBalancerArn:
-        Ref: WebAppLB
+        Ref: WebApplicationLoadBalancer
       Port: '80'
       Protocol: HTTP
 
@@ -255,23 +275,56 @@ Resources:
         BlockPublicPolicy: true
         RestrictPublicBuckets: true
 
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub ${S3Bucket.Arn}/*
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudfrontDistribution}
+
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: "origin access control(OAC) for allowing cloudfront to access S3 bucket"
+        Name: static-hosting-OAC
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
   CloudfrontDistribution:
     Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - S3Bucket
     Properties:
       DistributionConfig:
         Origins:
-            - DomainName: !Ref BucketName
-              Id: s3OriginId
-              S3OriginConfig:
-                OriginAccessIdentity: origin-access-identity/cloudfront/E127EXAMPLE51Z
+          - DomainName: !GetAtt S3Bucket.DomainName
+            Id: s3OriginId
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
         Enabled: 'true'
         DefaultRootObject: index.html
         DefaultCacheBehavior:
           AllowedMethods:
+            - HEAD
             - GET
             - OPTIONS
-          TargetOriginId: myS3Origin
+          TargetOriginId: s3OriginId
           ViewerProtocolPolicy: allow-all
+          ForwardedValues:
+            QueryString: "false"
+            Cookies:
+              Forward: none
         PriceClass: PriceClass_200
         Restrictions:
           GeoRestriction:
