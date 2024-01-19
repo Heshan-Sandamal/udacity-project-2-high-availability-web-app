@@ -48,7 +48,7 @@ Parameters:
 
   KeyName:
     Description: Key Name
-    Type: String
+    Type: AWS::EC2::KeyPair::KeyName
     Default: my-udacity-keypair
 
 Resources:
