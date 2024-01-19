@@ -28,6 +28,10 @@
 		"ParameterValue": "t2.micro"
 	},
 	{
+		"ParameterKey": "VolumeSize",
+		"ParameterValue": "10"
+	},
+	{
 		"ParameterKey": "BucketName",
 		"ParameterValue": "us-east-1-udacity-project-2-bucket"
 	},

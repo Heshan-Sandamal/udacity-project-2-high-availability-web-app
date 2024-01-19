@@ -31,6 +31,11 @@ Parameters:
     Type: String
     Default: t2.micro
 
+  VolumeSize:
+    Description: Size of the Volume
+    Type: String
+    Default: 10
+
   BucketName:
     Description: Bucket Name
     Type: String
@@ -119,14 +124,14 @@ Resources:
         BlockDeviceMappings:
           - DeviceName: "/dev/sdk"
             Ebs:
-              VolumeSize: '8'
+              VolumeSize: !Ref VolumeSize
         IamInstanceProfile:
           Name: !Ref WebAppInstanceProfile
 
   BastionHostRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${EnvironmentName}-bastian-servers"
+      RoleName: !Sub "${EnvironmentName}-bastian-server-role"
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -148,7 +153,7 @@ Resources:
   WebAppInstanceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${EnvironmentName}-web-servers"
+      RoleName: !Sub "${EnvironmentName}-web-server-role"
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -165,7 +170,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 's3:GetObject'
+                  - 's3:*Object'
                 Resource:
                   - !Sub "arn:aws:s3:::${BucketName}/*"
 
@@ -189,7 +194,12 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: "/dev/sdk"
           Ebs:
-            VolumeSize: '8'
+            VolumeSize: !Ref VolumeSize
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Bastion-Host
+        - Key: Owner
+          Value: !Ref Owner
 
   WebAppGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -205,6 +215,31 @@ Resources:
       MaxSize: !Ref MaxInstanceCount
       TargetGroupARNs:
         - Ref: WebAppTargetGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-Autoscaling-Group
+        - Key: Owner
+          Value: !Ref Owner
+
+  WebAppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 8
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: "${EnvironmentName}-VPCID"
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-Target-Group
+        - Key: Owner
+          Value: !Ref Owner
 
   WebApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -214,6 +249,11 @@ Resources:
         - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
       SecurityGroups:
         - Ref: LBSecGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-Load-Balancer
+        - Key: Owner
+          Value: !Ref Owner
 
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -232,27 +272,12 @@ Resources:
     Properties:
       Actions:
         - Type: forward
-          TargetGroupArn: !Ref 'WebAppTargetGroup'
+          TargetGroupArn: !Ref WebAppTargetGroup
       Conditions:
         - Field: path-pattern
           Values: [ / ]
       ListenerArn: !Ref 'Listener'
       Priority: 1
-
-  WebAppTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      HealthCheckIntervalSeconds: 10
-      HealthCheckPath: /
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 8
-      HealthyThresholdCount: 2
-      Port: 80
-      Protocol: HTTP
-      UnhealthyThresholdCount: 5
-      VpcId:
-        Fn::ImportValue:
-          Fn::Sub: "${EnvironmentName}-VPCID"
 
   S3Bucket:
     Type: AWS::S3::Bucket
@@ -274,6 +299,11 @@ Resources:
         IgnorePublicAcls: true
         BlockPublicPolicy: true
         RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-S3-Bucket
+        - Key: Owner
+          Value: !Ref Owner
 
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -295,7 +325,7 @@ Resources:
     Properties:
       OriginAccessControlConfig:
         Description: "origin access control(OAC) for allowing cloudfront to access S3 bucket"
-        Name: static-hosting-OAC
+        Name: cloud-front-OAC
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -334,6 +364,11 @@ Resources:
               - CV
         ViewerCertificate:
           CloudFrontDefaultCertificate: 'true'
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-cloud-front
+        - Key: Owner
+          Value: !Ref Owner
 
 Outputs:
   LoadBalancer:
@@ -342,3 +377,16 @@ Outputs:
       Fn::Join: [ "", [ "http://", !GetAtt WebApplicationLoadBalancer.DNSName ] ]
     Export:
       Name: !Sub ${EnvironmentName}-Application-LoadBalancer-Public-Url
+
+  CloudFront:
+    Description: Cloud Front Distribution URL
+    Value:
+      Fn::Join: [ "", [ "https://", !GetAtt CloudfrontDistribution.DomainName ] ]
+    Export:
+      Name: !Sub ${EnvironmentName}-CloudFront-Domain-Name
+
+  BastionHost:
+    Description: Bastion Host
+    Value: !GetAtt BastionHost.PublicIp
+    Export:
+      Name: !Sub ${EnvironmentName}-Bastion-Host-Public-Ip

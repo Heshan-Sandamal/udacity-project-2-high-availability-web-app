@@ -2,7 +2,7 @@ Description: Udacity Project 2- Networking Resources
 
 Parameters:
   EnvironmentName:
-    Description: An environment name that will be prefixed to resource names
+    Description: An environment name
     Type: String
 
   Owner:
@@ -15,22 +15,22 @@ Parameters:
     Default: 10.0.0.0/16
 
   PublicSubnet1CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Description: IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
     Default: 10.0.2.0/24
 
   PublicSubnet2CIDR:
-    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
+    Description: IP range (CIDR notation) for the public subnet in the second Availability Zone
     Type: String
     Default: 10.0.5.0/24
 
   PrivateSubnet1CIDR:
-    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Description: IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
     Default: 10.0.6.0/24
 
   PrivateSubnet2CIDR:
-    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Description: IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.0.7.0/24
 
@@ -40,7 +40,7 @@ Resources:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: !Ref VpcCIDR
-      EnableDnsHostnames: true  # Todo is this needed
+      EnableDnsHostnames: true
       Tags:
         - Key: Name
           Value: !Ref EnvironmentName
@@ -162,6 +162,9 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ1)
+        - Key: Owner
+          Value: !Ref Owner
+
 
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
@@ -173,6 +176,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
+        - Key: Owner
+          Value: !Ref Owner
 
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
@@ -181,6 +186,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Routes (AZ1)
+        - Key: Owner
+          Value: !Ref Owner
 
   DefaultPrivateRoute1:
     Type: AWS::EC2::Route
@@ -202,6 +209,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Routes (AZ2)
+        - Key: Owner
+          Value: !Ref Owner
 
   DefaultPrivateRoute2:
     Type: AWS::EC2::Route
