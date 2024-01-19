@@ -218,8 +218,10 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-Autoscaling-Group
+          PropagateAtLaunch: true
         - Key: Owner
           Value: !Ref Owner
+          PropagateAtLaunch: true
 
   WebAppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -356,12 +358,6 @@ Resources:
             Cookies:
               Forward: none
         PriceClass: PriceClass_200
-        Restrictions:
-          GeoRestriction:
-            RestrictionType: whitelist
-            Locations:
-              - AQ
-              - CV
         ViewerCertificate:
           CloudFrontDefaultCertificate: 'true'
       Tags:

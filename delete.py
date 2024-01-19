@@ -7,4 +7,4 @@ response = client.delete_stack(
     StackName=sys.argv[1]
 )
 
-print("Deleting the Stack: ", sys.argv[1])
+print("Deleting the Stack: ", response)

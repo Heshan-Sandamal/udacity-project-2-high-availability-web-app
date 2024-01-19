@@ -12,7 +12,8 @@ response = client.create_stack(
     TemplateBody=cft_template,
     Parameters=params,
     Capabilities=[
-        'CAPABILITY_IAM'
+        'CAPABILITY_IAM',
+        'CAPABILITY_NAMED_IAM'
     ],
 )
 
