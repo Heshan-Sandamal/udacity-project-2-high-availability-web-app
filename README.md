@@ -39,6 +39,12 @@ python3 update.py udacity-project-2-networking-resources network.yml network-par
 
 python3 update.py udacity-project-2-application-resources udagram.yml udagram-parameters.json
 
+## SSH to EC2 Instances through Bastion Host
+ssh -J bastion_user@bastion_server_dns ec2_user@ec2_ip
+
+Example:
+ssh -J ubuntu@ec2-54-82-53-54.compute-1.amazonaws.com ubuntu@10.0.6.165
+
 ## Tear down instructions
 
 #### In order to clear S3 Bucket please use the following command
