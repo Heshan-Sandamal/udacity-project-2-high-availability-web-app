@@ -288,10 +288,6 @@ Resources:
       AccessControl: Private
       VersioningConfiguration:
         Status: Enabled
-      LifecycleConfiguration:
-        Rules:
-          - Status: "Enabled"
-            NoncurrentVersionExpirationInDays: 5
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:

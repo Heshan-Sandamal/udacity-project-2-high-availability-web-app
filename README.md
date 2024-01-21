@@ -82,3 +82,16 @@ python3 scripts/delete.py udacity-project-2-application-resources
 ##### 3- Delete Networking Infrastructure
 
 python3 scripts/delete.py udacity-project-2-networking-resources
+
+### Other Details
+
+#### 1. If cloudfront shows access denied page
+
+Upload a file to s3 bucket through console or doing ssh to instance and then upload from instance
+Then that file should be able to be accessed through cloudfront or directly using the s3 url
+
+Eg: if index.html is uploaded to the bucket, It can be accessed using following urls
+
+https://us-east-1-udacity-project-2-bucket.s3.amazonaws.com/index.html
+https://{cloud-front-assigned-name}.cloudfront.net/index.html
+
