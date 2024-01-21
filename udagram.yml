@@ -117,6 +117,9 @@ Resources:
             sudo apt-get update -y
             sudo apt-get install nginx -y
             sudo service nginx start
+            cd /var/www/html/
+            yes | sudo rm index.nginx-debian.html
+            sudo echo "<html><h1>It works! Udagram, Udacity</h1></html>" > index.nginx-debian.html
         ImageId: !Ref AmiId
         SecurityGroupIds:
           - !Ref WebServerSecGroup
