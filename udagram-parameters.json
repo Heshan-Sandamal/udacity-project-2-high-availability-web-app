@@ -9,15 +9,15 @@
 	},
 	{
 		"ParameterKey": "MaxInstanceCount",
-		"ParameterValue": "2"
+		"ParameterValue": "10"
 	},
 	{
 		"ParameterKey": "MinInstanceCount",
-		"ParameterValue": "0"
+		"ParameterValue": "1"
 	},
 	{
 		"ParameterKey": "DesiredInstanceCount",
-		"ParameterValue": "1"
+		"ParameterValue": "4"
 	},
 	{
 		"ParameterKey": "AmiId",

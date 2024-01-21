@@ -297,10 +297,10 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        IgnorePublicAcls: true
-        BlockPublicPolicy: true
-        RestrictPublicBuckets: true
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-S3-Bucket
@@ -316,11 +316,7 @@ Resources:
           - Action: s3:GetObject
             Effect: Allow
             Resource: !Sub ${S3Bucket.Arn}/*
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudfrontDistribution}
+            Principal: "*"
 
   CloudFrontOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
