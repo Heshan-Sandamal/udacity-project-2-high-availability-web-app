@@ -9,7 +9,7 @@
 
 ## Spin up instructions
 
-#### In order to create the stack please use the following command
+#### Create Commands Specification
 
 python3 scripts/create.py stack-name template.yml parameters.json
 
@@ -25,7 +25,7 @@ python3 scripts/create.py udacity-project-2-application-resources udagram.yml ud
 
 ## Update Instructions
 
-#### In order to update the stack please use the following command
+#### Update Command Specification
 
 python3 scripts/update.py stack-name template.yml parameters.json
 
@@ -61,11 +61,11 @@ ssh -J ubuntu@54.160.238.19 ubuntu@10.0.6.165
 
 ## Tear down instructions
 
-#### In order to clear S3 Bucket please use the following command
+#### Clear S3 bucket specification
 
 python3 scripts/clear_s3.py bucket_name
 
-#### In order to delete the stack please use the following command
+#### Delete Command Specification
 
 python3 scripts/delete.py stack-name
 
