@@ -54,10 +54,10 @@ Example: (using gitbash in windows)
 
 ##### 3 - SSH to instance
 
-ssh -J bastion_user@bastion_server_dns ec2_user@ec2_ip
+ssh -J bastion_user@bastion_server_ip ec2_user@ec2_ip
 
 Example:
-ssh -J ubuntu@ec2-54-82-53-54.compute-1.amazonaws.com ubuntu@10.0.6.165
+ssh -J ubuntu@54.160.238.19 ubuntu@10.0.6.165
 
 ## Tear down instructions
 
@@ -93,5 +93,5 @@ Then that file should be able to be accessed through cloudfront or directly usin
 Eg: if index.html is uploaded to the bucket, It can be accessed using following urls
 
 https://us-east-1-udacity-project-2-bucket.s3.amazonaws.com/index.html
-https://{cloud-front-assigned-name}.cloudfront.net/index.html
+<br>https://{cloud-front-assigned-name}.cloudfront.net/index.html
 
